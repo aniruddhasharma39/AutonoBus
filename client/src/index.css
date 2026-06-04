@@ -1,0 +1,309 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@property --brand-hue {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: true;
+}
+
+:root {
+  /* Globals */
+  --font-family: 'Inter', sans-serif;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f6f8;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+
+  /* Global Synchronized Hue Animation */
+  animation: hueCycle 20s linear infinite;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes hueCycle {
+  0% {
+    --brand-hue: 0deg;
+  }
+
+  100% {
+    --brand-hue: 360deg;
+  }
+}
+
+/* 
+  Global Synchronized Gradient 
+  Top-Left is dark (low lightness), Bottom-Right is light (high lightness)
+  The hue changes globally, synchronized by the root animation
+*/
+
+.sync-gradient-bg {
+  background: linear-gradient(135deg, hsl(var(--brand-hue, 0deg), 90%, 20%) 0%, hsl(var(--brand-hue, 0deg), 90%, 75%) 100%);
+  color: white;
+}
+
+.sync-gradient-border {
+  border: 4px solid transparent;
+  background-image:
+    linear-gradient(var(--bg-primary), var(--bg-primary)),
+    linear-gradient(135deg,
+      hsl(var(--brand-hue, 0deg) 90% 20% / 0.20) 0%,
+      hsl(var(--brand-hue, 0deg) 90% 75% / 0.20) 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.sync-gradient-border-vertical {
+  border: 4px solid transparent;
+  background-image: linear-gradient(var(--bg-primary), var(--bg-primary)),
+    linear-gradient(to top, hsl(var(--brand-hue, 0deg), 90%, 20%) 0%, hsl(var(--brand-hue, 0deg), 90%, 75%) 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.sync-gradient-text {
+  background: linear-gradient(135deg, hsl(var(--brand-hue, 0deg), 90%, 20%) 0%, hsl(var(--brand-hue, 0deg), 90%, 75%) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Common UI Elements */
+button {
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-family);
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 10px 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  color: white;
+}
+
+.card {
+  background-color: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+}
+
+/* ============================================
+   ADMIN LAYOUT - MOBILE RESPONSIVE
+   ============================================ */
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-secondary);
+}
+
+/* Sidebar */
+.admin-sidebar {
+  width: 250px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Main admin content */
+.admin-main {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* Mobile hamburger toggle */
+.admin-hamburger {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Mobile sidebar overlay */
+.admin-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 998;
+}
+
+.admin-sidebar-overlay.open {
+  display: block;
+}
+
+/* ============================================
+   CUSTOMER LAYOUT - MOBILE RESPONSIVE HEADER
+   ============================================ */
+
+.customer-header {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.customer-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ============================================
+   RESPONSIVE TABLE UTILITY
+   ============================================ */
+
+.responsive-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================
+   MEDIA QUERIES
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Admin layout: hide sidebar by default on mobile, show as drawer */
+  .admin-hamburger {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    left: -270px;
+    top: 0;
+    height: 100vh;
+    z-index: 999;
+    transition: left 0.3s ease;
+    width: 260px;
+  }
+
+  .admin-sidebar.open {
+    left: 0;
+  }
+
+  .admin-main {
+    padding: 16px;
+    padding-top: 64px; /* space for hamburger */
+    width: 100%;
+  }
+
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  /* Customer header */
+  .customer-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .customer-header-nav {
+    gap: 12px;
+  }
+
+  /* Cards */
+  .card {
+    padding: 16px;
+  }
+
+  /* Seat selection: stack vertically */
+  .seat-selection-layout {
+    flex-direction: column !important;
+  }
+
+  /* Checkout: stack columns */
+  .checkout-layout {
+    flex-direction: column !important;
+  }
+
+  .checkout-summary-col {
+    width: 100% !important;
+    position: static !important;
+  }
+
+  /* Search results: stack price section */
+  .bus-card-inner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+
+  .bus-card-right {
+    text-align: left !important;
+    width: 100%;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  /* Profile tab: profile card stack */
+  .profile-card-inner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  /* Landing page search: wrap to column */
+  .search-form-inner {
+    flex-direction: column !important;
+    padding: 0 !important;
+  }
+
+  .search-field {
+    border-right: none !important;
+    border-bottom: 1px solid #edf2f7 !important;
+    padding: 12px 16px !important;
+  }
+
+  .search-submit-col {
+    max-width: 100% !important;
+    padding: 12px !important;
+  }
+
+  .hero-img {
+    height: 200px !important;
+  }
+
+  /* Admin tables: horizontal scroll */
+  .card table {
+    min-width: 500px;
+  }
+}
