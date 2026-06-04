@@ -71,7 +71,7 @@ const LandingPage = () => {
   };
 
   return (
-    <div style={{ padding: '30px 20px 40px 20px', textAlign: 'center' }}>
+    <div className="landing-page-wrapper" style={{ padding: '30px 20px 40px 20px', textAlign: 'center' }}>
 
       <div
         className="hero-img"
@@ -156,7 +156,7 @@ const LandingPage = () => {
 
       {/* Premium Search Bar */}
       <div
-        className="sync-gradient-border"
+        className="sync-gradient-border search-bar-wrapper"
         style={{
           maxWidth: '1100px',
           width: '95%',
@@ -202,6 +202,7 @@ const LandingPage = () => {
 
             {/* Elegant Swap Button */}
             <div
+              className="swap-button-wrapper"
               style={{
                 position: 'absolute',
                 right: '-18px',

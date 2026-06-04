@@ -12,6 +12,7 @@ const CustomerLayout = () => {
           <img
             src="/garuda-logo.png"
             alt="Garuda Logo"
+            className="garuda-logo"
             style={{ height: '40px', objectFit: 'contain', filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))' }}
             onError={(e) => {
               e.target.style.display = 'none';
@@ -20,6 +21,7 @@ const CustomerLayout = () => {
           <img
             src="/urbanlines-logo.png"
             alt="Urbanlines Logo"
+            className="urbanlines-logo"
             style={{ height: '52px', objectFit: 'contain', filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))' }}
             onError={(e) => {
               e.target.style.display = 'none';
