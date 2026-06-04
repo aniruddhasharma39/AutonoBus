@@ -7,14 +7,11 @@
 }
 
 :root {
-  /* Globals */
   --font-family: 'Inter', sans-serif;
   --bg-primary: #ffffff;
   --bg-secondary: #f4f6f8;
   --text-primary: #1e293b;
   --text-secondary: #64748b;
-
-  /* Global Synchronized Hue Animation */
   animation: hueCycle 20s linear infinite;
 }
 
@@ -33,23 +30,15 @@ body {
 }
 
 @keyframes hueCycle {
-  0% {
-    --brand-hue: 0deg;
-  }
-
-  100% {
-    --brand-hue: 360deg;
-  }
+  0%   { --brand-hue: 0deg; }
+  100% { --brand-hue: 360deg; }
 }
 
-/* 
-  Global Synchronized Gradient 
-  Top-Left is dark (low lightness), Bottom-Right is light (high lightness)
-  The hue changes globally, synchronized by the root animation
-*/
-
+/* ── Gradient Utilities ─────────────────────────── */
 .sync-gradient-bg {
-  background: linear-gradient(135deg, hsl(var(--brand-hue, 0deg), 90%, 20%) 0%, hsl(var(--brand-hue, 0deg), 90%, 75%) 100%);
+  background: linear-gradient(135deg,
+    hsl(var(--brand-hue, 0deg), 90%, 20%) 0%,
+    hsl(var(--brand-hue, 0deg), 90%, 75%) 100%);
   color: white;
 }
 
@@ -66,20 +55,25 @@ body {
 
 .sync-gradient-border-vertical {
   border: 4px solid transparent;
-  background-image: linear-gradient(var(--bg-primary), var(--bg-primary)),
-    linear-gradient(to top, hsl(var(--brand-hue, 0deg), 90%, 20%) 0%, hsl(var(--brand-hue, 0deg), 90%, 75%) 100%);
+  background-image:
+    linear-gradient(var(--bg-primary), var(--bg-primary)),
+    linear-gradient(to top,
+      hsl(var(--brand-hue, 0deg), 90%, 20%) 0%,
+      hsl(var(--brand-hue, 0deg), 90%, 75%) 100%);
   background-origin: border-box;
   background-clip: padding-box, border-box;
 }
 
 .sync-gradient-text {
-  background: linear-gradient(135deg, hsl(var(--brand-hue, 0deg), 90%, 20%) 0%, hsl(var(--brand-hue, 0deg), 90%, 75%) 100%);
+  background: linear-gradient(135deg,
+    hsl(var(--brand-hue, 0deg), 90%, 20%) 0%,
+    hsl(var(--brand-hue, 0deg), 90%, 75%) 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Common UI Elements */
+/* ── Buttons ────────────────────────────────────── */
 button {
   cursor: pointer;
   border: none;
@@ -89,16 +83,13 @@ button {
   padding: 10px 20px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+.btn-primary { color: white; }
 
-.btn-primary {
-  color: white;
-}
-
+/* ── Card ───────────────────────────────────────── */
 .card {
   background-color: var(--bg-primary);
   border-radius: 12px;
@@ -106,17 +97,13 @@ button:hover {
   padding: 24px;
 }
 
-/* ============================================
-   ADMIN LAYOUT - MOBILE RESPONSIVE
-   ============================================ */
-
+/* ── Admin Layout ───────────────────────────────── */
 .admin-layout {
   display: flex;
   min-height: 100vh;
   background-color: var(--bg-secondary);
 }
 
-/* Sidebar */
 .admin-sidebar {
   width: 250px;
   padding: 24px;
@@ -129,20 +116,19 @@ button:hover {
   overflow-y: auto;
 }
 
-/* Main admin content */
 .admin-main {
   flex: 1;
   padding: 32px;
-  overflow-y: auto;
+  overflow-x: hidden;   /* prevent horizontal overflow */
   min-width: 0;
 }
 
-/* Mobile hamburger toggle */
+/* Hamburger – hidden on desktop */
 .admin-hamburger {
   display: none;
   position: fixed;
-  top: 16px;
-  left: 16px;
+  top: 12px;
+  left: 12px;
   z-index: 1000;
   background: white;
   border: 1px solid #e2e8f0;
@@ -150,9 +136,12 @@ button:hover {
   padding: 8px 12px;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-/* Mobile sidebar overlay */
 .admin-sidebar-overlay {
   display: none;
   position: fixed;
@@ -160,15 +149,51 @@ button:hover {
   background: rgba(0,0,0,0.5);
   z-index: 998;
 }
+.admin-sidebar-overlay.open { display: block; }
 
-.admin-sidebar-overlay.open {
-  display: block;
+/* ── Admin Page Header (title + action button) ──── */
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.admin-page-header h1 {
+  font-size: 28px;
+  line-height: 1.2;
 }
 
-/* ============================================
-   CUSTOMER LAYOUT - MOBILE RESPONSIVE HEADER
-   ============================================ */
+/* ── Responsive Table Wrapper ───────────────────── */
+.responsive-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* subtle scroll hint shadow on the right */
+  background:
+    linear-gradient(to right, white 30%, rgba(255,255,255,0)),
+    linear-gradient(to right, rgba(255,255,255,0), white 70%) 0 100%,
+    radial-gradient(farthest-side at 0% 50%, rgba(0,0,0,.12), transparent),
+    radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.12), transparent) 0 100%;
+  background-repeat: no-repeat;
+  background-color: white;
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+  border-radius: 8px;
+}
 
+.responsive-table-wrapper table {
+  width: 100%;
+  min-width: 520px;   /* forces scroll rather than clipping */
+  border-collapse: collapse;
+  text-align: left;
+}
+
+/* ── Mobile Card List (replaces table rows on xs) ── */
+.mobile-card-list { display: none; }
+
+/* ── Customer Header ────────────────────────────── */
 .customer-header {
   padding: 16px 24px;
   display: flex;
@@ -176,34 +201,19 @@ button:hover {
   align-items: center;
   color: white;
 }
-
 .customer-header-nav {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
-/* ============================================
-   RESPONSIVE TABLE UTILITY
-   ============================================ */
-
-.responsive-table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* ============================================
-   MEDIA QUERIES
-   ============================================ */
-
+/* ─────────────────────────────────────────────────
+   MEDIA QUERIES  ≤ 768 px
+   ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Admin layout: hide sidebar by default on mobile, show as drawer */
-  .admin-hamburger {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+
+  /* -- Hamburger & Sidebar drawer -- */
+  .admin-hamburger { display: flex; }
 
   .admin-sidebar {
     position: fixed;
@@ -214,96 +224,56 @@ button:hover {
     transition: left 0.3s ease;
     width: 260px;
   }
-
-  .admin-sidebar.open {
-    left: 0;
-  }
+  .admin-sidebar.open { left: 0; }
 
   .admin-main {
     padding: 16px;
-    padding-top: 64px; /* space for hamburger */
+    padding-top: 60px;   /* room for hamburger */
     width: 100%;
   }
 
-  .admin-layout {
+  /* -- Admin page header stacks vertically -- */
+  .admin-page-header {
     flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
   }
-
-  /* Customer header */
-  .customer-header {
-    padding: 12px 16px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .customer-header-nav {
-    gap: 12px;
-  }
-
-  /* Cards */
-  .card {
-    padding: 16px;
-  }
-
-  /* Seat selection: stack vertically */
-  .seat-selection-layout {
-    flex-direction: column !important;
-  }
-
-  /* Checkout: stack columns */
-  .checkout-layout {
-    flex-direction: column !important;
-  }
-
-  .checkout-summary-col {
-    width: 100% !important;
-    position: static !important;
-  }
-
-  /* Search results: stack price section */
-  .bus-card-inner {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 16px !important;
-  }
-
-  .bus-card-right {
-    text-align: left !important;
+  .admin-page-header h1 { font-size: 22px; }
+  .admin-page-header button,
+  .admin-page-header a {
     width: 100%;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
+    text-align: center;
   }
 
-  /* Profile tab: profile card stack */
-  .profile-card-inner {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-  }
+  /* -- Cards -- */
+  .card { padding: 16px; }
 
-  /* Landing page search: wrap to column */
-  .search-form-inner {
-    flex-direction: column !important;
-    padding: 0 !important;
-  }
+  /* -- Customer header -- */
+  .customer-header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+  .customer-header-nav { gap: 10px; }
 
+  /* -- Search form stacks -- */
+  .search-form-inner { flex-direction: column !important; }
   .search-field {
     border-right: none !important;
     border-bottom: 1px solid #edf2f7 !important;
-    padding: 12px 16px !important;
+    padding: 14px 16px !important;
+    min-width: 0 !important;
   }
+  .search-submit-col { max-width: 100% !important; padding: 12px !important; }
+  .hero-img { height: 200px !important; }
 
-  .search-submit-col {
-    max-width: 100% !important;
-    padding: 12px !important;
-  }
+  /* -- Bus search results -- */
+  .bus-card-inner { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+  .bus-card-right { text-align: left !important; width: 100%; display: flex !important; justify-content: space-between !important; align-items: center !important; }
 
-  .hero-img {
-    height: 200px !important;
-  }
+  /* -- Seat selection -- */
+  .seat-selection-layout { flex-direction: column !important; }
 
-  /* Admin tables: horizontal scroll */
-  .card table {
-    min-width: 500px;
-  }
+  /* -- Checkout -- */
+  .checkout-layout { flex-direction: column !important; }
+  .checkout-summary-col { width: 100% !important; position: static !important; }
+
+  /* -- Profile -- */
+  .profile-card-inner { flex-direction: column !important; align-items: flex-start !important; }
 }

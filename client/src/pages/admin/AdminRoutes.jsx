@@ -317,15 +317,15 @@ const AdminRoutes = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <h1 className="sync-gradient-text" style={{ fontSize: '32px' }}>Route Management</h1>
+      <div className="admin-page-header">
+        <h1 className="sync-gradient-text">Route Management</h1>
         <button 
           className={showForm ? "btn-secondary" : "sync-gradient-bg btn-primary"} 
           onClick={() => {
             if(showForm) handleCancel();
             else setShowForm(true);
           }}
-          style={{ padding: '8px 16px', border: showForm ? '1px solid #ddd' : 'none', backgroundColor: showForm ? 'transparent' : undefined }}
+          style={{ padding: '10px 20px', border: showForm ? '1px solid #ddd' : 'none', backgroundColor: showForm ? 'transparent' : undefined }}
         >
           {showForm ? 'Cancel' : '+ Add New Route'}
         </button>
@@ -495,43 +495,45 @@ const AdminRoutes = () => {
         </div>
       )}
 
-      <div className="card">
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
-              <th style={{ padding: '12px' }}>Route Name</th>
-              <th style={{ padding: '12px' }}>Path</th>
-              <th style={{ padding: '12px' }}>Distance (km)</th>
-              <th style={{ padding: '12px' }}>Duration (hrs)</th>
-              <th style={{ padding: '12px', textAlign: 'center' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {routes.length === 0 ? (
-              <tr><td colSpan="5" style={{ padding: '12px', textAlign: 'center' }}>No routes found. Add one above.</td></tr>
-            ) : null}
-            {routes.map(route => (
-              <tr key={route._id} style={{ borderBottom: '1px solid var(--bg-secondary)', transition: 'background-color 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f8fafc'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                <td style={{ padding: '12px', fontWeight: 'bold', width: '25%' }}>{route.name}</td>
-                <td style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                  {route.cities?.map(c => c.cityName)?.join(' → ')}
-                </td>
-                <td style={{ padding: '12px' }}>{route.distance || '-'}</td>
-                <td style={{ padding: '12px' }}>{route.estimatedDuration || '-'}</td>
-                <td style={{ padding: '12px' }}>
-                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                    <button style={{ padding: '6px 16px', backgroundColor: '#e0f2fe', color: '#0369a1', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleEdit(route)}>
-                      Edit
-                    </button>
-                    <button style={{ padding: '6px 16px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleDelete(route._id)}>
-                      Delete
-                    </button>
-                  </div>
-                </td>
+      <div className="card" style={{ padding: '0' }}>
+        <div className="responsive-table-wrapper" style={{ padding: '0 4px' }}>
+          <table>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Route Name</th>
+                <th style={{ padding: '14px 16px' }}>Path</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Dist. (km)</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Duration</th>
+                <th style={{ padding: '14px 16px', textAlign: 'center', whiteSpace: 'nowrap' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {routes.length === 0 ? (
+                <tr><td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>No routes found. Add one above.</td></tr>
+              ) : null}
+              {routes.map(route => (
+                <tr key={route._id} style={{ borderBottom: '1px solid var(--bg-secondary)' }}>
+                  <td style={{ padding: '12px 16px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{route.name}</td>
+                  <td style={{ padding: '12px 16px', color: 'var(--text-secondary)', fontSize: '13px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {route.cities?.map(c => c.cityName)?.join(' → ')}
+                  </td>
+                  <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>{route.distance || '-'}</td>
+                  <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>{route.estimatedDuration || '-'} hrs</td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button style={{ padding: '6px 14px', backgroundColor: '#e0f2fe', color: '#0369a1', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', whiteSpace: 'nowrap' }} onClick={() => handleEdit(route)}>
+                        Edit
+                      </button>
+                      <button style={{ padding: '6px 14px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', whiteSpace: 'nowrap' }} onClick={() => handleDelete(route._id)}>
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

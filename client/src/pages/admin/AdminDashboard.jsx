@@ -47,13 +47,13 @@ const AdminDashboard = () => {
 
   return (
     <div>
-      <h1 className="sync-gradient-text" style={{ fontSize: '32px', marginBottom: '32px' }}>Dashboard Overview</h1>
+      <h1 className="sync-gradient-text" style={{ fontSize: 'clamp(22px, 5vw, 32px)', marginBottom: '24px' }}>Dashboard Overview</h1>
       
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '32px' }}>
         <StatCard title="Total Buses" value={stats.buses} icon={Bus} />
         <StatCard title="Active Routes" value={stats.routes} icon={Map} />
         <StatCard title="Upcoming Trips" value={stats.schedules} icon={CalendarClock} />
-        <StatCard title="Customers System" value={stats.users} icon={Users} />
+        <StatCard title="Customers" value={stats.users} icon={Users} />
       </div>
 
       <div className="card">

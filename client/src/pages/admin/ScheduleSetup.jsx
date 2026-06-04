@@ -95,96 +95,98 @@ const ScheduleSetup = () => {
 
   return (
     <div>
-      <h1 className="sync-gradient-text" style={{ fontSize: '32px', marginBottom: '8px' }}>Schedule Setup</h1>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>Define date ranges and bus types for active routes to generate daily assignments.</p>
+      <h1 className="sync-gradient-text" style={{ fontSize: 'clamp(22px, 5vw, 32px)', marginBottom: '8px' }}>Schedule Setup</h1>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', fontSize: '14px' }}>Define date ranges for active routes to generate daily assignments.</p>
 
-      {/* Per-Route Forms */}
-      <div className="card" style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>Configure Active Routes</h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
-              <th style={{ padding: '12px' }}>Route</th>
-              <th style={{ padding: '12px' }}>From Date</th>
-              <th style={{ padding: '12px' }}>To Date</th>
-              <th style={{ padding: '12px' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {routes.map(route => (
-              <tr key={route._id} style={{ borderBottom: '1px solid var(--bg-secondary)' }}>
-                <td style={{ padding: '12px', fontWeight: 'bold' }}>{route.name}</td>
-                <td style={{ padding: '12px' }}>
-                  <input 
-                    type="date" 
-                    value={formStates[route._id]?.fromDate || ''} 
-                    onChange={(e) => handleInputChange(route._id, 'fromDate', e.target.value)}
-                    style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                  />
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <input 
-                    type="date" 
-                    value={formStates[route._id]?.toDate || ''} 
-                    onChange={(e) => handleInputChange(route._id, 'toDate', e.target.value)}
-                    style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                  />
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <button 
-                    onClick={() => handleCreateSchedule(route._id)}
-                    className="sync-gradient-bg btn-primary"
-                    style={{ padding: '8px 16px' }}
-                  >
-                    Generate Schedule
-                  </button>
-                </td>
+      <div className="card" style={{ marginBottom: '24px', padding: '0' }}>
+        <h2 style={{ fontSize: '18px', padding: '16px 16px 0 16px' }}>Configure Active Routes</h2>
+        <div className="responsive-table-wrapper" style={{ padding: '0 4px' }}>
+          <table>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Route</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>From Date</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>To Date</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {routes.map(route => (
+                <tr key={route._id} style={{ borderBottom: '1px solid var(--bg-secondary)' }}>
+                  <td style={{ padding: '12px 16px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{route.name}</td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <input 
+                      type="date" 
+                      value={formStates[route._id]?.fromDate || ''} 
+                      onChange={(e) => handleInputChange(route._id, 'fromDate', e.target.value)}
+                      style={{ padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '14px' }}
+                    />
+                  </td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <input 
+                      type="date" 
+                      value={formStates[route._id]?.toDate || ''} 
+                      onChange={(e) => handleInputChange(route._id, 'toDate', e.target.value)}
+                      style={{ padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '14px' }}
+                    />
+                  </td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <button 
+                      onClick={() => handleCreateSchedule(route._id)}
+                      className="sync-gradient-bg btn-primary"
+                      style={{ padding: '8px 14px', fontSize: '13px', whiteSpace: 'nowrap' }}
+                    >
+                      Generate
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Active Schedules List */}
-      <div className="card">
-        <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>Active Master Schedules</h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
-              <th style={{ padding: '12px' }}>Route</th>
-              <th style={{ padding: '12px' }}>Date Range</th>
-              <th style={{ padding: '12px' }}>Bus Type</th>
-              <th style={{ padding: '12px' }}>Capacity</th>
-              <th style={{ padding: '12px' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {schedules.length === 0 ? (
-              <tr><td colSpan="4" style={{ padding: '12px', textAlign: 'center' }}>No active generic schedules generated.</td></tr>
-            ) : null}
-            {schedules.map(schedule => (
-              <tr key={schedule._id} style={{ borderBottom: '1px solid var(--bg-secondary)' }}>
-                <td style={{ padding: '12px', fontWeight: 'bold' }}>
-                  {schedule.route?.name || 'Unknown Route'}
-                </td>
-                <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>
-                  {schedule.fromDate} to {schedule.toDate}
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <span style={{ backgroundColor: '#e2e8f0', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>{schedule.route?.busType}</span>
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{schedule.route?.busCapacity} seats</span>
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <button style={{ padding: '6px 12px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleDelete(schedule._id)}>
-                    Delete Rule
-                  </button>
-                </td>
+      <div className="card" style={{ padding: '0' }}>
+        <h2 style={{ fontSize: '18px', padding: '16px 16px 0 16px' }}>Active Master Schedules</h2>
+        <div className="responsive-table-wrapper" style={{ padding: '0 4px' }}>
+          <table>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Route</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Date Range</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Bus Type</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Capacity</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {schedules.length === 0 ? (
+                <tr><td colSpan="4" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>No active schedules generated.</td></tr>
+              ) : null}
+              {schedules.map(schedule => (
+                <tr key={schedule._id} style={{ borderBottom: '1px solid var(--bg-secondary)' }}>
+                  <td style={{ padding: '12px 16px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                    {schedule.route?.name || 'Unknown Route'}
+                  </td>
+                  <td style={{ padding: '12px 16px', color: 'var(--text-secondary)', fontSize: '13px', whiteSpace: 'nowrap' }}>
+                    {schedule.fromDate} → {schedule.toDate}
+                  </td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <span style={{ backgroundColor: '#e2e8f0', padding: '3px 8px', borderRadius: '4px', fontSize: '12px', whiteSpace: 'nowrap' }}>{schedule.route?.busType}</span>
+                  </td>
+                  <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{schedule.route?.busCapacity} seats</span>
+                  </td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <button style={{ padding: '6px 14px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', whiteSpace: 'nowrap' }} onClick={() => handleDelete(schedule._id)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>

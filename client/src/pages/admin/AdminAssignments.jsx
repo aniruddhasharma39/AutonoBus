@@ -229,56 +229,54 @@ const AdminAssignments = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <h1 className="sync-gradient-text" style={{ fontSize: '32px' }}>Daily Assignments</h1>
-        
-        <div>
-          <label style={{ marginRight: '16px', fontWeight: 'bold' }}>Select Date:</label>
+      <div className="admin-page-header">
+        <h1 className="sync-gradient-text">Daily Assignments</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <label style={{ fontWeight: 'bold', fontSize: '14px', whiteSpace: 'nowrap' }}>Select Date:</label>
           <input 
             type="date" 
             value={selectedDate} 
             onChange={(e) => setSelectedDate(e.target.value)}
-            style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+            style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '14px' }}
           />
         </div>
       </div>
 
-      <div className="card">
-        {loading ? <p>Loading assignments...</p> : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="card" style={{ padding: '0' }}>
+        {loading ? <p style={{ padding: '24px' }}>Loading assignments...</p> : (
+          <div className="responsive-table-wrapper" style={{ padding: '0 4px' }}>
+          <table style={{ borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
-                <th style={{ padding: '12px' }}>Route</th>
-                <th style={{ padding: '12px' }}>Required Bus Type</th>
-                <th style={{ padding: '12px' }}>Occupancy</th>
-                <th style={{ padding: '12px' }}>Assigned Bus</th>
-                <th style={{ padding: '12px' }}>Manage</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Route</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Bus Type</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Occupancy</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Assigned Bus</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Manage</th>
               </tr>
             </thead>
             <tbody>
               {assignments.length === 0 ? (
-                <tr><td colSpan="5" style={{ padding: '12px', textAlign: 'center' }}>No active assignments found for {selectedDate}.</td></tr>
+                <tr><td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>No active assignments found for {selectedDate}.</td></tr>
               ) : null}
               {assignments.map(assignment => {
-                // Filter buses strictly by BOTH busType and totalSeats
                 const compatibleBuses = buses.filter(b => b.type === assignment.busType && Number(b.totalSeats) === assignment.totalSeats);
-                
                 const isExpanded = expandedAssignmentId === assignment._id;
                 return (
                   <React.Fragment key={assignment._id}>
                     <tr style={{ borderBottom: isExpanded ? 'none' : '1px solid var(--bg-secondary)', backgroundColor: isExpanded ? '#f8fafc' : 'white' }}>
-                    <td style={{ padding: '12px', fontWeight: 'bold' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                       {assignment.route?.name || 'Unknown Route'}
                     </td>
-                    <td style={{ padding: '12px' }}>
-                      <span style={{ backgroundColor: '#e2e8f0', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>
+                    <td style={{ padding: '12px 16px' }}>
+                      <span style={{ backgroundColor: '#e2e8f0', padding: '3px 8px', borderRadius: '4px', fontSize: '12px', whiteSpace: 'nowrap' }}>
                         {assignment.busType} ({assignment.totalSeats} seats)
                       </span>
                     </td>
-                    <td style={{ padding: '12px' }}>
-                      {assignment.bookedSeats.length} seats booked
+                    <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                      {assignment.bookedSeats.length} booked
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td style={{ padding: '12px 16px' }}>
                       {assignment.bus ? (
                         <div style={{ color: 'green', fontWeight: 'bold' }}>✓ {assignment.bus.name} ({assignment.bus.busNumber})</div>
                       ) : (
@@ -295,12 +293,12 @@ const AdminAssignments = () => {
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td style={{ padding: '12px 16px' }}>
                       <button 
                         onClick={() => handleToggleExpand(assignment._id)}
-                        style={{ padding: '6px 12px', backgroundColor: isExpanded ? '#cbd5e1' : '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                        style={{ padding: '6px 14px', backgroundColor: isExpanded ? '#cbd5e1' : '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', whiteSpace: 'nowrap' }}
                       >
-                        {isExpanded ? 'Close Chart' : 'Seat Chart'}
+                        {isExpanded ? 'Close' : 'Seat Chart'}
                       </button>
                     </td>
                   </tr>
@@ -399,9 +397,10 @@ const AdminAssignments = () => {
                   </React.Fragment>
                 );
             })}
-          </tbody>
-        </table>
-      )}
+            </tbody>
+          </table>
+          </div>
+        )}
       </div>
     </div>
   );

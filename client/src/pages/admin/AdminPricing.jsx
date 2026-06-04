@@ -244,12 +244,12 @@ const AdminPricing = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <h1 className="sync-gradient-text" style={{ fontSize: '32px' }}>Route Pricing schedules</h1>
+      <div className="admin-page-header">
+        <h1 className="sync-gradient-text">Route Pricing Schedules</h1>
         <button 
           className={showForm ? "btn-secondary" : "sync-gradient-bg btn-primary"} 
           onClick={() => setShowForm(!showForm)}
-          style={{ padding: '8px 16px', border: showForm ? '1px solid #ddd' : 'none', backgroundColor: showForm ? 'transparent' : undefined }}
+          style={{ padding: '10px 20px', border: showForm ? '1px solid #ddd' : 'none', backgroundColor: showForm ? 'transparent' : undefined }}
         >
           {showForm ? 'Cancel' : '+ Add Pricing'}
         </button>
@@ -334,40 +334,42 @@ const AdminPricing = () => {
         </div>
       )}
 
-      <div className="card">
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
-              <th style={{ padding: '12px' }}>Base Route</th>
-              <th style={{ padding: '12px' }}>Total Sub-routes</th>
-              <th style={{ padding: '12px' }}>Dynamic Seats</th>
-              <th style={{ padding: '12px' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pricings.length === 0 ? (
-              <tr><td colSpan="4" style={{ padding: '12px', textAlign: 'center' }}>No pricing defined.</td></tr>
-            ) : null}
-            {pricings.map(pricing => (
-              <tr key={pricing._id} style={{ borderBottom: '1px solid var(--bg-secondary)' }}>
-                <td style={{ padding: '12px', fontWeight: 'bold' }}>
-                  {pricing.route?.name || 'Unknown Route'}
-                </td>
-                <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>
-                  {pricing.priceMatrix?.length || 0} permutations priced
-                </td>
-                <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>
-                  {pricing.dynamicPricing?.length || 0} seats adjusted
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <button style={{ padding: '6px 12px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleDelete(pricing._id)}>
-                    Delete
-                  </button>
-                </td>
+      <div className="card" style={{ padding: '0' }}>
+        <div className="responsive-table-wrapper" style={{ padding: '0 4px' }}>
+          <table>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Base Route</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Sub-routes</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Dynamic Seats</th>
+                <th style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {pricings.length === 0 ? (
+                <tr><td colSpan="4" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>No pricing defined.</td></tr>
+              ) : null}
+              {pricings.map(pricing => (
+                <tr key={pricing._id} style={{ borderBottom: '1px solid var(--bg-secondary)' }}>
+                  <td style={{ padding: '12px 16px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                    {pricing.route?.name || 'Unknown Route'}
+                  </td>
+                  <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
+                    {pricing.priceMatrix?.length || 0} permutations
+                  </td>
+                  <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
+                    {pricing.dynamicPricing?.length || 0} seats
+                  </td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <button style={{ padding: '6px 14px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }} onClick={() => handleDelete(pricing._id)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
