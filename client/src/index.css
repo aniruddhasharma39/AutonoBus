@@ -151,6 +151,12 @@ button:hover {
 }
 .admin-sidebar-overlay.open { display: block; }
 
+/* ── Hero Slide Background ──────────────────────── */
+.hero-slide-bg {
+  background-size: cover;
+  background-position: center;
+}
+
 /* ── Admin Page Header (title + action button) ──── */
 .admin-page-header {
   display: flex;
@@ -249,19 +255,26 @@ button:hover {
   .card { padding: 16px; }
 
   /* -- Customer header -- */
-  .customer-header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
-  .customer-header-nav { gap: 10px; }
+  .customer-header { padding: 10px 14px; flex-wrap: nowrap; gap: 8px; overflow-x: auto; }
+  .customer-header-nav { gap: 10px; flex-shrink: 0; }
 
   /* -- Search form stacks -- */
-  .search-form-inner { flex-direction: column !important; }
+  .search-form-inner { flex-direction: column !important; align-items: stretch !important; }
   .search-field {
     border-right: none !important;
     border-bottom: 1px solid #edf2f7 !important;
     padding: 14px 16px !important;
     min-width: 0 !important;
+    text-align: left !important;
   }
+  .search-field label, .search-field select { text-align: left !important; }
   .search-submit-col { max-width: 100% !important; padding: 12px !important; }
-  .hero-img { height: 200px !important; }
+  .hero-img { height: 280px !important; }
+  .hero-slide-bg {
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: top center !important;
+  }
 
   /* -- Bus search results -- */
   .bus-card-inner { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }

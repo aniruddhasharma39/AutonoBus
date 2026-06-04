@@ -52,8 +52,7 @@ const CustomerLayout = () => {
             </div>
           ) : (
             <>
-              <Link to="/login" style={{ color: 'white', textDecoration: 'none', fontWeight: '500', fontSize: '15px' }}>Login</Link>
-              <Link to="/register" style={{ color: 'white', textDecoration: 'none', fontWeight: '500', fontSize: '15px', padding: '6px 14px', backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: '8px' }}>Register</Link>
+              <Link to="/login" style={{ color: 'white', textDecoration: 'none', fontWeight: '500', fontSize: '15px', padding: '6px 14px', backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: '8px' }}>Login</Link>
             </>
           )}
         </nav>

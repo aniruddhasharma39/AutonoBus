@@ -99,9 +99,9 @@ const LandingPage = () => {
               opacity: currentSlide === index ? 1 : 0,
               transition: 'opacity 0.8s ease-in-out',
               backgroundImage: `url(${slide.image})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
+              backgroundColor: '#1e293b'
             }}
+            className="hero-slide-bg"
           >
             {/* Gradient Overlay for Text Visibility */}
             <div style={{
@@ -194,7 +194,7 @@ const LandingPage = () => {
               required
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              style={{ width: '100%', border: 'none', outline: 'none', fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', backgroundColor: 'transparent', cursor: 'pointer', appearance: 'none', padding: 0 }}
+              style={{ width: '100%', border: 'none', outline: 'none', fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', backgroundColor: 'transparent', cursor: 'pointer', appearance: 'none', padding: 0, textAlign: 'left' }}
             >
               <option value="" disabled>Select Origin</option>
               {cities.map(city => <option key={`from-${city}`} value={city}>{city}</option>)}
