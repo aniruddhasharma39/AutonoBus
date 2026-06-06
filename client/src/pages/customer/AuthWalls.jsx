@@ -32,8 +32,12 @@ const AuthWalls = () => {
       if (data.role === 'admin') {
         window.location.href = '/admin';
       } else {
-        const redirect = location.state?.from?.pathname || '/';
-        window.location.href = redirect;
+        const fromLocation = location.state?.from;
+        if (fromLocation) {
+          navigate(fromLocation.pathname, { state: fromLocation.state });
+        } else {
+          navigate('/');
+        }
       }
     } catch (error) {
       alert(error.response?.data?.message || 'Authentication Failed');

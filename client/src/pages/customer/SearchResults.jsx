@@ -4,19 +4,53 @@ import axios from 'axios';
 import API_BASE from '../../api';
 
 const SearchResults = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [buses, setBuses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState('');
+  const [expandedBusId, setExpandedBusId] = useState(null);
 
   const reqSource = searchParams.get('source');
   const reqDest = searchParams.get('destination');
   const reqDate = searchParams.get('date');
 
+  // Helper to generate the 5 days array
+  const getNext5Days = (startDateStr) => {
+    const dates = [];
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    let targetDate = startDateStr ? new Date(startDateStr) : new Date(today);
+    targetDate.setHours(0,0,0,0);
+    
+    let startDay = new Date(targetDate);
+    startDay.setDate(startDay.getDate() - 2);
+    
+    if (startDay < today) {
+      startDay = new Date(today);
+    }
+    
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(startDay);
+      d.setDate(d.getDate() + i);
+      dates.push(d);
+    }
+    return dates;
+  };
+
   const getAvailabilityColor = (seats) => {
     if (seats >= 15) return '#16a34a'; // Green
     if (seats >= 5) return '#f59e0b';  // Yellow/Orange
     return '#dc2626'; // Red
+  };
+
+  // Helper to safely format local date as YYYY-MM-DD
+  const formatDateLocal = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   };
 
   // Helper to add days to a YYYY-MM-DD string
@@ -152,6 +186,76 @@ const SearchResults = () => {
         </button>
       </div>
 
+      {/* Date Scroller */}
+      {reqSource && reqDest && (
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
+            {getNext5Days(reqDate).map((d, index) => {
+              const dateStr = formatDateLocal(d);
+              const isSelected = dateStr === reqDate;
+              return (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setSearchParams(prev => {
+                      prev.set('date', dateStr);
+                      return prev;
+                    });
+                    setToastMessage(`Showing buses for ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
+                    setTimeout(() => setToastMessage(''), 3000);
+                  }}
+                  style={{
+                    minWidth: '100px',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: isSelected ? 'none' : '1px solid #e2e8f0',
+                    backgroundColor: isSelected ? 'transparent' : 'white',
+                    color: isSelected ? 'white' : 'var(--text-primary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: isSelected ? '0 4px 6px rgba(139, 92, 246, 0.3)' : 'none'
+                  }}
+                  className={isSelected ? 'sync-gradient-bg' : ''}
+                >
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                    {d.toLocaleDateString('en-US', { weekday: 'short' })}
+                  </span>
+                  <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    {d.getDate()} {d.toLocaleDateString('en-US', { month: 'short' })}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          {/* Inline Toast Notification */}
+          <div style={{
+            height: '20px', 
+            marginTop: '8px',
+            opacity: toastMessage ? 1 : 0,
+            transition: 'opacity 0.3s ease-in-out',
+            color: 'var(--text-secondary)',
+            fontSize: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontWeight: '500'
+          }}>
+            {toastMessage && (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#10b981' }}>
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                {toastMessage}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {buses.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
@@ -162,38 +266,85 @@ const SearchResults = () => {
         {buses.map(bus => {
           const availableSeats = (bus.route?.busCapacity || 30) - (bus.bookedSeats?.length || 0);
           return (
-          <div key={bus._id} className="card sync-gradient-border bus-card-inner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'transform 0.2s', padding: '20px', gap: '16px' }}>
+          <div key={bus._id} className="card sync-gradient-border" style={{ display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', padding: '20px', gap: '16px' }}>
             
-            <div style={{ flex: 1 }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>{bus.route?.serviceName || 'UrbanLines by Garuda'}</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px', fontWeight: '500' }}>
-                {bus.route?.busType || bus.busType} • <span style={{ color: getAvailabilityColor(availableSeats), fontWeight: 'bold' }}>{availableSeats} Seats Available</span>
-              </p>
-              <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
-                <div>
-                  <p style={{ fontSize: '18px', fontWeight: '600' }}>{bus.journeySlice.departureTime}</p>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{bus.journeySlice.source}</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
+              {/* Bus Info */}
+              <div style={{ flex: '1 1 auto', minWidth: '150px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{bus.route?.serviceName || 'UrbanLines by Garuda'}</h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: '500' }}>
+                  {bus.route?.busType || bus.busType} • <span style={{ color: getAvailabilityColor(availableSeats), fontWeight: 'bold' }}>{availableSeats} Seats Available</span>
+                </p>
+              </div>
+
+              {/* Timings and Price grouped together to minimize gap on mobile */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center', flex: '2 1 auto', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ fontSize: '16px', fontWeight: '600' }}>{bus.journeySlice.departureTime}</p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{bus.journeySlice.source}</p>
+                  </div>
+                  <div style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
+                    <p style={{ fontSize: '12px', fontWeight: '500' }}>{bus.journeySlice.duration}</p>
+                    <p style={{ fontSize: '10px', color: '#cbd5e1' }}>──────</p>
+                  </div>
+                  <div style={{ textAlign: 'left' }}>
+                    <p style={{ fontSize: '16px', fontWeight: '600' }}>{bus.journeySlice.arrivalTime}</p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{bus.journeySlice.destination}</p>
+                  </div>
                 </div>
-                <div style={{ color: 'var(--text-secondary)', alignSelf: 'center', textAlign: 'center' }}>
-                  <p style={{ fontSize: '14px', fontWeight: '500' }}>{bus.journeySlice.duration}</p>
-                  <p style={{ fontSize: '10px', color: '#cbd5e1' }}>───────────────────</p>
-                </div>
-                <div>
-                  <p style={{ fontSize: '18px', fontWeight: '600' }}>{bus.journeySlice.arrivalTime}</p>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{bus.journeySlice.destination}</p>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '11px', marginBottom: '2px' }}>Starts from</p>
+                    <p style={{ fontSize: '18px', fontWeight: 'bold' }}>₹{bus.basePrice?.sleeper}</p>
+                  </div>
+                  <button 
+                    onClick={() => navigate(`/seat-selection/${bus._id}`, { state: { journeySlice: bus.journeySlice, basePrice: bus.basePrice } })} 
+                    className="sync-gradient-bg btn-primary"
+                    style={{ padding: '8px 16px', fontSize: '14px', whiteSpace: 'nowrap' }}
+                  >
+                    View Seats
+                  </button>
                 </div>
               </div>
             </div>
 
-            <div className="bus-card-right" style={{ textAlign: 'right', flexShrink: 0 }}>
-              <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>₹{bus.basePrice?.sleeper}</p>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '16px' }}>Starts from</p>
+            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px', marginTop: '4px' }}>
               <button 
-                onClick={() => navigate(`/seat-selection/${bus._id}`, { state: { journeySlice: bus.journeySlice, basePrice: bus.basePrice } })} 
-                className="sync-gradient-bg btn-primary"
+                onClick={() => setExpandedBusId(expandedBusId === bus._id ? null : bus._id)}
+                style={{ fontSize: '14px', fontWeight: '500', cursor: 'pointer', color: 'var(--grad-2)', outline: 'none', background: 'transparent', border: 'none', padding: 0, display: 'flex', alignItems: 'center', gap: '4px' }}
               >
-                View Seats
+                View Boarding & Dropping Points
+                <span style={{ transform: expandedBusId === bus._id ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'inline-block', fontSize: '10px' }}>▼</span>
               </button>
+              
+              {expandedBusId === bus._id && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', marginTop: '16px', animation: 'fadeIn 0.3s ease-in-out' }}>
+                  <div style={{ flex: '1 1 200px' }}>
+                    <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-primary)' }}>Boarding Points in {bus.journeySlice.source}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {(bus.journeySlice.sourceCityFull?.boardingPoints || []).map((bp, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                          <span style={{ paddingRight: '16px' }}>{bp.location}</span>
+                          <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{bp.time}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ flex: '1 1 200px' }}>
+                    <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', color: 'var(--text-primary)' }}>Dropping Points in {bus.journeySlice.destination}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {(bus.journeySlice.destCityFull?.droppingPoints || []).map((dp, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                          <span style={{ paddingRight: '16px' }}>{dp.location}</span>
+                          <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{dp.time}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )})}

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminBuses from './pages/admin/AdminBuses';
@@ -19,7 +19,8 @@ import CustomerProfile from './pages/customer/CustomerProfile';
 const getUserInfo = () => JSON.parse(sessionStorage.getItem('userInfo'));
 
 const PrivateRoute = ({ children }) => {
-  return getUserInfo() ? children : <Navigate to="/login" />;
+  const location = useLocation();
+  return getUserInfo() ? children : <Navigate to="/login" state={{ from: location }} />;
 };
 
 const AdminRoute = ({ children }) => {
