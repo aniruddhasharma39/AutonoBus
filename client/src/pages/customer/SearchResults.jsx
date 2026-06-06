@@ -10,6 +10,7 @@ const SearchResults = () => {
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState('');
   const [expandedBusId, setExpandedBusId] = useState(null);
+  const [sortBy, setSortBy] = useState('early_to_late');
 
   const reqSource = searchParams.get('source');
   const reqDest = searchParams.get('destination');
@@ -77,10 +78,10 @@ const SearchResults = () => {
 
           // If source/dest provided, ensure they exist and in correct order
           if (reqSource) {
-            startIndex = assignment.route.cities.findIndex(s => s.cityName.toLowerCase() === reqSource.toLowerCase());
+            startIndex = assignment.route.cities.findIndex(s => s.cityName.trim().toLowerCase() === reqSource.trim().toLowerCase());
           }
           if (reqDest) {
-            endIndex = assignment.route.cities.findIndex(s => s.cityName.toLowerCase() === reqDest.toLowerCase());
+            endIndex = assignment.route.cities.findIndex(s => s.cityName.trim().toLowerCase() === reqDest.trim().toLowerCase());
           }
 
           if (startIndex === -1 || endIndex === -1 || startIndex >= endIndex) {
@@ -96,8 +97,8 @@ const SearchResults = () => {
 
           return true;
         }).map(assignment => {
-           let startIndex = reqSource ? assignment.route.cities.findIndex(s => s.cityName.toLowerCase() === reqSource.toLowerCase()) : 0;
-           let endIndex = reqDest ? assignment.route.cities.findIndex(s => s.cityName.toLowerCase() === reqDest.toLowerCase()) : assignment.route.cities.length - 1;
+           let startIndex = reqSource ? assignment.route.cities.findIndex(s => s.cityName.trim().toLowerCase() === reqSource.trim().toLowerCase()) : 0;
+           let endIndex = reqDest ? assignment.route.cities.findIndex(s => s.cityName.trim().toLowerCase() === reqDest.trim().toLowerCase()) : assignment.route.cities.length - 1;
 
            const startCity = assignment.route.cities[startIndex];
            const endCity = assignment.route.cities[endIndex];
@@ -169,6 +170,20 @@ const SearchResults = () => {
 
   if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Searching for buses...</div>;
 
+  // Sort buses before rendering
+  const sortedBuses = [...buses].sort((a, b) => {
+    if (sortBy === 'early_to_late') {
+      return new Date(a.journeySlice.departureDateISO) - new Date(b.journeySlice.departureDateISO);
+    } else if (sortBy === 'late_to_early') {
+      return new Date(b.journeySlice.departureDateISO) - new Date(a.journeySlice.departureDateISO);
+    } else if (sortBy === 'price_low_high') {
+      return a.basePrice.sleeper - b.basePrice.sleeper;
+    } else if (sortBy === 'price_high_low') {
+      return b.basePrice.sleeper - a.basePrice.sleeper;
+    }
+    return 0;
+  });
+
   return (
     <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto', flex: 1 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px' }}>
@@ -178,12 +193,24 @@ const SearchResults = () => {
           </h1>
           {reqDate && <p style={{ color: 'var(--text-secondary)' }}>On {new Date(reqDate).toLocaleDateString()} • {buses.length} Buses Found</p>}
         </div>
-        <button 
-          onClick={() => navigate('/')} 
-          style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #ddd', borderRadius: '8px' }}
-        >
-          Modify Search
-        </button>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)}
+            style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #ddd', backgroundColor: 'white', cursor: 'pointer', outline: 'none' }}
+          >
+            <option value="early_to_late">Departure: Earliest First</option>
+            <option value="late_to_early">Departure: Latest First</option>
+            <option value="price_low_high">Price: Lowest First</option>
+            <option value="price_high_low">Price: Highest First</option>
+          </select>
+          <button 
+            onClick={() => navigate('/')} 
+            style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #ddd', borderRadius: '8px', cursor: 'pointer' }}
+          >
+            Modify Search
+          </button>
+        </div>
       </div>
 
       {/* Date Scroller */}
@@ -257,13 +284,13 @@ const SearchResults = () => {
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {buses.length === 0 ? (
+        {sortedBuses.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
             No buses found matching your criteria. Try different dates or routes.
           </div>
         ) : null}
         
-        {buses.map(bus => {
+        {sortedBuses.map(bus => {
           const availableSeats = (bus.route?.busCapacity || 30) - (bus.bookedSeats?.length || 0);
           return (
           <div key={bus._id} className="card sync-gradient-border" style={{ display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', padding: '20px', gap: '16px' }}>

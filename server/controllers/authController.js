@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import Booking from '../models/Booking.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -102,3 +103,26 @@ export const updateUserProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Get all customers
+// @route   GET /api/auth/customers
+// @access  Private/Admin
+export const getAllCustomers = async (req, res) => {
+  try {
+    const customers = await User.find({ role: 'customer' }).select('-password').sort({ createdAt: -1 });
+    
+    // Aggregate bookings count for each customer
+    const customersWithBookings = await Promise.all(customers.map(async (customer) => {
+      const bookingCount = await Booking.countDocuments({ user: customer._id });
+      return {
+        ...customer.toObject(),
+        bookingCount
+      };
+    }));
+
+    res.json(customersWithBookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

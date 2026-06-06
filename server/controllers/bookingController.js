@@ -5,6 +5,8 @@ import Counter from '../models/Counter.js';
 import { sendTicket } from '../utils/emailService.js';
 
 import Pricing from '../models/Pricing.js';
+import Offer from '../models/Offer.js';
+import { createNotification } from './notificationController.js';
 
 // Helper to get auto-incrementing PNR
 const getNextPnr = async () => {
@@ -21,7 +23,7 @@ const getNextPnr = async () => {
 // @route   POST /api/bookings
 // @access  Private
 export const createBooking = async (req, res) => {
-  const { assignmentId, seats, totalAmount, boardingPoint, droppingPoint, sourceCity, destinationCity } = req.body;
+  const { assignmentId, seats, totalAmount, boardingPoint, droppingPoint, sourceCity, destinationCity, offerCode, discountAmount } = req.body;
 
   if (!seats || seats.length === 0) {
     return res.status(400).json({ message: 'No seats selected' });
@@ -66,8 +68,46 @@ export const createBooking = async (req, res) => {
       expectedTotal += seatPrice;
     }
 
-    if (Math.abs(expectedTotal - totalAmount) > 0.01) {
-      return res.status(400).json({ message: `Price mismatch. Expected ${expectedTotal}, got ${totalAmount}` });
+    let finalExpectedTotal = expectedTotal;
+
+    // If offer code is provided, atomically check and push to usedBy
+    let appliedOffer = null;
+    let actualDiscount = 0;
+    if (offerCode) {
+      appliedOffer = await Offer.findOneAndUpdate(
+        {
+          code: offerCode.toUpperCase().trim(),
+          isActive: true,
+          'usedBy.user': { $ne: req.user._id }
+        },
+        {
+          $push: { usedBy: { user: req.user._id, usedAt: new Date() } }
+        },
+        { new: true }
+      );
+      
+      if (!appliedOffer) {
+        return res.status(400).json({ message: 'Offer is invalid, expired, or already used.' });
+      }
+
+      // Calculate the discount
+      if (appliedOffer.discountType === 'percentage') {
+        actualDiscount = Math.round((expectedTotal * appliedOffer.discountValue) / 100);
+      } else {
+        actualDiscount = Math.min(appliedOffer.discountValue, expectedTotal);
+      }
+      finalExpectedTotal = Math.max(0, expectedTotal - actualDiscount);
+    }
+
+    if (Math.abs(finalExpectedTotal - totalAmount) > 0.01) {
+      // Rollback offer if we applied it but price is mismatched
+      if (appliedOffer) {
+        await Offer.updateOne(
+          { _id: appliedOffer._id },
+          { $pull: { usedBy: { user: req.user._id } } }
+        );
+      }
+      return res.status(400).json({ message: `Price mismatch. Expected ${finalExpectedTotal}, got ${totalAmount}` });
     }
 
     // Atomically check and lock seats in the Assignment
@@ -103,6 +143,8 @@ export const createBooking = async (req, res) => {
     // Generate PNR
     const pnr = await getNextPnr();
 
+    // Offer was already validated and locked before price check
+
     // Create the booking
     const booking = new Booking({
       user: req.user._id,
@@ -112,6 +154,8 @@ export const createBooking = async (req, res) => {
       totalAmount,
       boardingPoint,
       droppingPoint,
+      appliedOfferCode: offerCode ? offerCode.toUpperCase().trim() : undefined,
+      discountAmount: actualDiscount || 0,
       status: 'confirmed'
     });
 
@@ -140,6 +184,9 @@ export const createBooking = async (req, res) => {
     } catch (err) {
       console.error('Failed to prepare ticket email:', err);
     }
+
+    // Create Notification
+    createNotification(req.user._id, `Your booking from ${sourceCity} to ${destinationCity} has been confirmed. PNR: ${pnr}`, 'booking_confirmed');
 
     res.status(201).json(savedBooking);
 

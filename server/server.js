@@ -11,6 +11,8 @@ import assignmentRoutes from './routes/assignmentRoutes.js';
 import pricingRoutes from './routes/pricingRoutes.js';
 import scheduleRoutes from './routes/scheduleManagerRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import offerRoutes from './routes/offerRoutes.js';
 
 dotenv.config();
 
@@ -43,10 +45,17 @@ app.use('/api/assignments', assignmentRoutes);
 app.use('/api/pricing', pricingRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/offers', offerRoutes);
 
 // --- Serve React client in production ---
 const clientBuildPath = path.join(__dirname, '../client/dist');
 app.use(express.static(clientBuildPath));
+
+// API 404 handler to prevent returning HTML for missing endpoints
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ message: 'API Route Not Found' });
+});
 
 // Catch-all: send React app for any non-API route
 app.get('*', (req, res) => {

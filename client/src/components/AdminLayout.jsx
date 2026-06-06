@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Bus, Map, CalendarDays, User, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Bus, Map, CalendarDays, User, Menu, X, Tag, Users } from 'lucide-react';
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -13,6 +13,8 @@ const AdminLayout = () => {
     { label: 'Pricing', path: '/admin/pricing', icon: CalendarDays },
     { label: 'Schedules', path: '/admin/schedules', icon: CalendarDays },
     { label: 'Daily Assignments', path: '/admin/assignments', icon: Bus },
+    { label: 'Offers & Coupons', path: '/admin/offers', icon: Tag },
+    { label: 'Customers', path: '/admin/customers', icon: Users },
     { label: 'Profile', path: '/admin/profile', icon: User },
   ];
 

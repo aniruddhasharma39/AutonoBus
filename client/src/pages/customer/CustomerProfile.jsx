@@ -67,7 +67,7 @@ const CustomerProfile = () => {
       <h1 className="sync-gradient-text" style={{ fontSize: '32px', marginBottom: '32px' }}>My Account</h1>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', borderBottom: '2px solid #e2e8f0', paddingBottom: '12px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px', borderBottom: '2px solid #e2e8f0', paddingBottom: '12px' }}>
         {['profile', 'bookings', 'passengers'].map(tab => (
           <button
             key={tab}
@@ -97,7 +97,7 @@ const CustomerProfile = () => {
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>{userInfo.name}</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Customer Account</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
               <div>
                 <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '4px' }}>Email Address</label>
                 <div style={{ padding: '12px', backgroundColor: '#f4f6f8', borderRadius: '8px', border: '1px solid #e2e8f0' }}>{userInfo.email}</div>
@@ -140,7 +140,8 @@ const CustomerProfile = () => {
                 boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
                 fontFamily: '"Courier New", Courier, monospace',
                 position: 'relative',
-                color: '#3e352a'
+                color: '#3e352a',
+                overflowX: 'auto'
               }}>
                 <div style={{ position: 'absolute', top: 0, left: '-15px', width: '30px', height: '30px', backgroundColor: 'var(--bg-primary)', borderRadius: '50%' }}></div>
                 <div style={{ position: 'absolute', top: 0, right: '-15px', width: '30px', height: '30px', backgroundColor: 'var(--bg-primary)', borderRadius: '50%' }}></div>
@@ -152,7 +153,7 @@ const CustomerProfile = () => {
                   <p style={{ margin: '8px 0 0 0', fontStyle: 'italic', fontSize: '14px' }}>Journey Details</p>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '16px', marginBottom: '24px' }}>
                   <div>
                     <p style={{ margin: '0 0 8px 0', fontSize: '18px' }}><strong>PNR NO:</strong> {selectedBooking.pnr}</p>
                     <p style={{ margin: '0 0 8px 0' }}><strong>STATUS:</strong> <span style={{ color: selectedBooking.status === 'confirmed' ? 'green' : 'orange' }}>{selectedBooking.status.toUpperCase()}</span></p>
@@ -163,7 +164,7 @@ const CustomerProfile = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#f5deb3', padding: '16px', borderRadius: '8px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '16px', backgroundColor: '#f5deb3', padding: '16px', borderRadius: '8px', marginBottom: '24px' }}>
                   <div style={{ width: '45%' }}>
                     <p style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#666' }}>{selectedBooking.assignment?.route?.name?.split(' - ')[0]?.toUpperCase() || 'BOARDING'}</p>
                     <p style={{ margin: 0, fontWeight: 'bold', fontSize: '16px' }}>{selectedBooking.boardingPoint}</p>
@@ -257,6 +258,7 @@ const CustomerProfile = () => {
           {passengers.length === 0 ? (
             <p style={{ color: 'var(--text-secondary)' }}>No saved passengers found.</p>
           ) : (
+            <div className="responsive-table-wrapper">
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
@@ -275,6 +277,7 @@ const CustomerProfile = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}

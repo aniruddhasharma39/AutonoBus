@@ -1,24 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Bell, X } from 'lucide-react';
+import axios from 'axios';
+import API_BASE from '../api';
 
 const CustomerLayout = () => {
   const navigate = useNavigate();
   const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Welcome to Garuda', message: 'Enjoy 10% off your first booking.', time: 'Just now' },
-    { id: 2, title: 'Cashback Received', message: '₹50 has been added to your wallet.', time: '2 hours ago' },
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
-  const removeNotification = (id) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+  const fetchNotifications = async () => {
+    if (userInfo && userInfo.token) {
+      try {
+        const { data } = await axios.get(`${API_BASE}/api/notifications`, {
+          headers: { Authorization: `Bearer ${userInfo.token}` }
+        });
+        setNotifications(data.filter(n => !n.isRead));
+      } catch (error) {
+        console.error('Failed to fetch notifications', error);
+      }
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications([]);
-    setIsModalOpen(false);
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const removeNotification = (id) => {
+    setNotifications(notifications.filter(n => n._id !== id));
+  };
+
+  const markAllAsRead = async () => {
+    if (userInfo && userInfo.token) {
+      try {
+        await axios.put(`${API_BASE}/api/notifications/read-all`, {}, {
+          headers: { Authorization: `Bearer ${userInfo.token}` }
+        });
+        setNotifications([]);
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error('Failed to mark notifications as read', error);
+      }
+    }
   };
 
   return (
@@ -111,14 +136,16 @@ const CustomerLayout = () => {
                         </div>
                       ) : (
                         notifications.map(notif => (
-                          <div key={notif.id} style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', transition: 'background-color 0.2s' }}>
+                          <div key={notif._id} style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', transition: 'background-color 0.2s' }}>
                             <div style={{ flex: 1 }}>
-                              <p style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>{notif.title}</p>
+                              <p style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', textTransform: 'capitalize' }}>
+                                {notif.type.replace('_', ' ')}
+                              </p>
                               <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{notif.message}</p>
-                              <p style={{ margin: 0, fontSize: '11px', color: '#94a3b8' }}>{notif.time}</p>
+                              <p style={{ margin: 0, fontSize: '11px', color: '#94a3b8' }}>{new Date(notif.createdAt).toLocaleString()}</p>
                             </div>
                             <button 
-                              onClick={() => removeNotification(notif.id)}
+                              onClick={() => removeNotification(notif._id)}
                               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#cbd5e1', borderRadius: '50%' }}
                               title="Remove"
                             >

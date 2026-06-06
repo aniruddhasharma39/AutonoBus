@@ -3,6 +3,19 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE from '../../api';
 
+const JourneyStrip = ({ journeySlice }) => {
+  if (!journeySlice) return null;
+  const depTime = journeySlice.departureDateISO ? new Date(journeySlice.departureDateISO).toLocaleString() : '--:--';
+  return (
+    <div className="sync-gradient-bg" style={{ borderRadius: '12px', padding: '16px 24px', marginBottom: '24px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', width: '100%' }}>
+      <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>{journeySlice.source}</span>
+      <span style={{ color: 'white', opacity: 0.8 }}>→</span>
+      <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>{journeySlice.destination}</span>
+      <span style={{ color: 'rgba(255,255,255,0.85)', marginLeft: 'auto' }}>{depTime}</span>
+    </div>
+  );
+};
+
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -22,6 +35,11 @@ const Checkout = () => {
   );
   
   const [savedPassengers, setSavedPassengers] = useState([]);
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedOffer, setAppliedOffer] = useState(null);
+  const [couponError, setCouponError] = useState('');
 
   useEffect(() => {
     if (userInfo.token) {
@@ -87,11 +105,13 @@ const Checkout = () => {
       const payload = {
         assignmentId: bookingData.scheduleId,
         seats: seatPassengers,
-        totalAmount: bookingData.totalAmount,
+        totalAmount: appliedOffer ? appliedOffer.finalAmount : bookingData.totalAmount,
         boardingPoint: selectedBoarding,
         droppingPoint: selectedDropping,
         sourceCity: bookingData.journeySlice?.source,
-        destinationCity: bookingData.journeySlice?.destination
+        destinationCity: bookingData.journeySlice?.destination,
+        offerCode: appliedOffer ? appliedOffer.code : undefined,
+        discountAmount: appliedOffer ? appliedOffer.discountAmount : 0
       };
 
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
@@ -112,7 +132,7 @@ const Checkout = () => {
         console.error("Could not save passengers", saveErr);
       }
 
-      alert(`Payment complete for ₹${bookingData.totalAmount}. Ticket confirmed!`);
+      alert(`Payment complete for ₹${appliedOffer ? appliedOffer.finalAmount : bookingData.totalAmount}. Ticket confirmed!`);
       navigate('/profile', { state: { message: 'Booking Successful!' } });
     } catch (error) {
       alert(error.response?.data?.message || 'Booking failed');
@@ -123,8 +143,32 @@ const Checkout = () => {
     }
   };
 
+  const validateCoupon = async () => {
+    setCouponError('');
+    if (!couponCode) return;
+    try {
+      const { data } = await axios.post(`${API_BASE}/api/offers/validate`, {
+        code: couponCode,
+        routeId: schedule?.route?._id || schedule?.route,
+        totalAmount: bookingData.totalAmount
+      }, {
+        headers: { Authorization: `Bearer ${userInfo.token}` }
+      });
+      setAppliedOffer(data);
+      setCouponCode(''); // clear input after applying
+    } catch (err) {
+      setAppliedOffer(null);
+      setCouponError(err.response?.data?.message || 'Invalid coupon code');
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedOffer(null);
+  };
+
   return (
     <div style={{ padding: '40px 20px', maxWidth: '1000px', margin: '0 auto', flex: 1 }}>
+      <JourneyStrip journeySlice={bookingData.journeySlice} />
       <h2 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '32px' }}>Checkout</h2>
 
       <div className="checkout-layout" style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -210,7 +254,7 @@ const Checkout = () => {
             </div>
 
             <button type="submit" className="sync-gradient-bg btn-primary" style={{ padding: '16px', fontSize: '18px', marginTop: '24px' }}>
-              Pay ₹{bookingData.totalAmount} & Book Ticket
+              Pay ₹{appliedOffer ? appliedOffer.finalAmount : bookingData.totalAmount} & Book Ticket
             </button>
           </form>
         </div>
@@ -259,9 +303,37 @@ const Checkout = () => {
               <span style={{ fontWeight: '600' }}>₹0</span>
             </div>
 
+            {/* Coupon Section */}
+            <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid #ddd' }}>
+              <h4 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px' }}>Apply Offer / Coupon</h4>
+              {!appliedOffer ? (
+                <div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input 
+                      type="text" 
+                      value={couponCode} 
+                      onChange={(e) => setCouponCode(e.target.value)} 
+                      placeholder="Enter code" 
+                      style={{ flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '8px', textTransform: 'uppercase' }} 
+                    />
+                    <button type="button" onClick={validateCoupon} className="sync-gradient-bg btn-primary" style={{ padding: '10px 16px' }}>Apply</button>
+                  </div>
+                  {couponError && <p style={{ color: 'red', fontSize: '13px', marginTop: '8px' }}>{couponError}</p>}
+                </div>
+              ) : (
+                <div style={{ backgroundColor: '#f0fdf4', border: '1px dashed #22c55e', padding: '12px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#166534', fontSize: '14px' }}>{appliedOffer.code} Applied!</p>
+                    <p style={{ margin: 0, color: '#15803d', fontSize: '13px' }}>- ₹{appliedOffer.discountAmount} ({appliedOffer.offerTitle})</p>
+                  </div>
+                  <button type="button" onClick={removeCoupon} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }}>Remove</button>
+                </div>
+              )}
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 'bold' }}>
               <span>Total Payable</span>
-              <span>₹{bookingData.totalAmount}</span>
+              <span>₹{appliedOffer ? appliedOffer.finalAmount : bookingData.totalAmount}</span>
             </div>
           </div>
         </div>

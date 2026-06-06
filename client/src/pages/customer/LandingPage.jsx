@@ -30,7 +30,10 @@ const LandingPage = () => {
         const uniqueCities = new Set();
         data.forEach(route => {
           route.cities?.forEach(city => {
-            if (city.cityName) uniqueCities.add(city.cityName);
+            if (city.cityName) {
+              const normalized = city.cityName.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+              uniqueCities.add(normalized);
+            }
           });
         });
         setCities(Array.from(uniqueCities).sort());

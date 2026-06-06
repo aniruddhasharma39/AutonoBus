@@ -3,6 +3,19 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE from '../../api';
 
+const JourneyStrip = ({ journeySlice }) => {
+  if (!journeySlice) return null;
+  const depTime = journeySlice.departureDateISO ? new Date(journeySlice.departureDateISO).toLocaleString() : '--:--';
+  return (
+    <div className="sync-gradient-bg" style={{ borderRadius: '12px', padding: '16px 24px', marginBottom: '24px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', width: '100%' }}>
+      <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>{journeySlice.source}</span>
+      <span style={{ color: 'white', opacity: 0.8 }}>→</span>
+      <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>{journeySlice.destination}</span>
+      <span style={{ color: 'rgba(255,255,255,0.85)', marginLeft: 'auto' }}>{depTime}</span>
+    </div>
+  );
+};
+
 const SeatSelection = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -109,7 +122,9 @@ const SeatSelection = () => {
   };
 
   return (
-    <div className="seat-selection-layout" style={{ padding: '24px 16px', maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '32px' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 16px' }}>
+      <JourneyStrip journeySlice={journeySlice} />
+      <div className="seat-selection-layout" style={{ display: 'flex', gap: '32px' }}>
       
       {/* Seat Layout Section */}
       <div style={{ flex: 2 }}>
@@ -273,6 +288,7 @@ const SeatSelection = () => {
             Proceed to Checkout
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

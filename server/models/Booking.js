@@ -14,6 +14,8 @@ const bookingSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending' },
   boardingPoint: { type: String, required: true },
   droppingPoint: { type: String, required: true },
+  appliedOfferCode: { type: String },
+  discountAmount: { type: Number, default: 0 },
   paymentIntentId: { type: String } // For future Stripe/Razorpay integration
 }, { timestamps: true });
 

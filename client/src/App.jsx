@@ -7,6 +7,8 @@ import AdminPricing from './pages/admin/AdminPricing';
 import AdminAssignments from './pages/admin/AdminAssignments';
 import ScheduleSetup from './pages/admin/ScheduleSetup';
 import AdminProfile from './pages/admin/AdminProfile';
+import AdminOffers from './pages/admin/AdminOffers';
+import AdminCustomers from './pages/admin/AdminCustomers';
 
 import CustomerLayout from './components/CustomerLayout';
 import LandingPage from './pages/customer/LandingPage';
@@ -65,6 +67,8 @@ function App() {
           <Route path="pricing" element={<AdminPricing />} />
           <Route path="schedules" element={<ScheduleSetup />} />
           <Route path="assignments" element={<AdminAssignments />} />
+          <Route path="offers" element={<AdminOffers />} />
+          <Route path="customers" element={<AdminCustomers />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>
       </Routes>
