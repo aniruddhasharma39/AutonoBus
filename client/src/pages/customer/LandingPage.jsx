@@ -12,6 +12,13 @@ const LandingPage = () => {
   const [journeyDate, setJourneyDate] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Showcase state
+  const [buses, setBuses] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [activeBusPairIndex, setActiveBusPairIndex] = useState(0);
+  const [selectedBusForModal, setSelectedBusForModal] = useState(null);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
+
   const heroSlides = [
     { image: '/images/buses/0039.png' },
   ];
@@ -41,8 +48,36 @@ const LandingPage = () => {
         console.error('Error fetching routes for cities', error);
       }
     };
+
+    const fetchBuses = async () => {
+      try {
+        const { data } = await axios.get(`${API_BASE}/api/buses`);
+        // Only include buses with images or just all buses
+        setBuses(data);
+      } catch (error) {
+        console.error('Error fetching buses', error);
+      }
+    };
+
     fetchRoutes();
+    fetchBuses();
   }, []);
+
+  useEffect(() => {
+    if (buses.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => {
+        if (prev === 3) {
+          if (buses.length > 2) {
+            setActiveBusPairIndex((prevPair) => (prevPair + 1) % buses.length);
+          }
+          return 0;
+        }
+        return prev + 1;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [buses.length]);
 
   const handleSwap = () => {
     const temp = source;
@@ -314,6 +349,188 @@ const LandingPage = () => {
           </div>
         </form>
       </div>
+
+      {/* Bus Services Showcase Section */}
+      {buses.length > 0 && (
+        <div style={{ maxWidth: '1200px', margin: '60px auto 40px', padding: '0 20px' }}>
+          <h2 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '16px', color: 'var(--text-primary)' }}>Our Premium Services</h2>
+          <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>
+            Experience luxury travel with our exclusive fleet. Each service is uniquely designed for your comfort.
+          </p>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
+            {[0, 1].map((offset) => {
+              if (buses.length === 1 && offset === 1) return null; // Only one bus available
+              const busIndex = (activeBusPairIndex + offset) % buses.length;
+              const bus = buses[busIndex];
+              const busImages = [
+                bus.images?.front || '/images/buses/placeholder-front.png',
+                bus.images?.right || '/images/buses/placeholder-right.png',
+                bus.images?.left || '/images/buses/placeholder-left.png',
+                bus.images?.back || '/images/buses/placeholder-back.png'
+              ];
+              
+              return (
+                <div 
+                  key={bus._id + offset} 
+                  style={{ 
+                    cursor: 'pointer', 
+                    position: 'relative',
+                    overflow: 'hidden', 
+                    padding: '24px', 
+                    paddingTop: '70px',
+                    borderRadius: '20px',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    background: `linear-gradient(135deg, #111827 0%, color-mix(in srgb, ${bus.themeColor || '#0f172a'} 50%, #000) 100%)`,
+                    border: `1px solid color-mix(in srgb, ${bus.themeColor || '#334155'} 40%, transparent)`,
+                    boxShadow: `0 10px 30px color-mix(in srgb, ${bus.themeColor || '#000'} 15%, transparent)`
+                  }}
+                  onClick={() => { setSelectedBusForModal(bus); setModalImageIndex(0); }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.boxShadow = `0 20px 40px color-mix(in srgb, ${bus.themeColor || '#000'} 35%, transparent)`;
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = `0 10px 30px color-mix(in srgb, ${bus.themeColor || '#000'} 15%, transparent)`;
+                  }}
+                >
+                  {/* Top Left Badge */}
+                  <div style={{ position: 'absolute', top: '20px', left: '24px', display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: `color-mix(in srgb, ${bus.themeColor || '#ffffff'} 20%, rgba(255,255,255,0.05))`, border: `1px solid color-mix(in srgb, ${bus.themeColor || '#ffffff'} 40%, transparent)`, borderRadius: '20px', zIndex: 10, backdropFilter: 'blur(8px)' }}>
+                    {bus.serviceImage && <img src={bus.serviceImage} alt="icon" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />}
+                    <span style={{ color: 'white', fontSize: '11px', fontWeight: '800', letterSpacing: '1px' }}>{bus.name.toUpperCase()}</span>
+                  </div>
+
+                  {/* Top Right Aura Image */}
+                  {bus.serviceImage && (
+                    <div style={{ position: 'absolute', top: '10px', right: '16px', zIndex: 5, pointerEvents: 'none' }}>
+                      <img src={bus.serviceImage} alt={bus.name} style={{ width: '90px', height: '90px', objectFit: 'contain', filter: `drop-shadow(0 0 25px ${bus.themeColor || '#fff'}) drop-shadow(0 0 10px rgba(255,255,255,0.5))` }} />
+                    </div>
+                  )}
+                  
+                  <div style={{ marginTop: '10px', marginBottom: '20px', zIndex: 2, position: 'relative', textAlign: 'left' }}>
+                    <h3 style={{ color: 'white', fontSize: '22px', fontWeight: 'bold', marginBottom: '4px' }}>UrbanLines</h3>
+                    <p style={{ fontSize: '13px', color: 'color-mix(in srgb, white 70%, transparent)', fontWeight: '500' }}>{bus.type} • {bus.totalSeats} Seats Available</p>
+                  </div>
+
+                  <div style={{ position: 'relative', height: '220px', borderRadius: '12px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 2 }}>
+                    {busImages.map((imgSrc, imgIdx) => (
+                      <img 
+                        key={imgIdx}
+                        src={imgSrc} 
+                        alt={`${bus.name} view ${imgIdx + 1}`}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          opacity: currentImageIndex === imgIdx ? 1 : 0,
+                          transition: 'opacity 0.5s ease-in-out'
+                        }}
+                      />
+                    ))}
+                    <div style={{ position: 'absolute', bottom: '10px', width: '100%', display: 'flex', justifyContent: 'center', gap: '6px' }}>
+                      {[0, 1, 2, 3].map(idx => (
+                        <div 
+                          key={idx} 
+                          style={{ 
+                            width: currentImageIndex === idx ? '16px' : '6px', 
+                            height: '6px', 
+                            borderRadius: '3px', 
+                            backgroundColor: currentImageIndex === idx ? 'white' : 'rgba(255,255,255,0.4)',
+                            transition: 'all 0.3s ease'
+                          }} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Full Screen Modal Gallery */}
+      {selectedBusForModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.9)',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <button 
+            onClick={() => setSelectedBusForModal(null)}
+            style={{ position: 'absolute', top: '20px', right: '30px', color: 'white', background: 'transparent', border: 'none', fontSize: '40px', cursor: 'pointer' }}
+          >
+            &times;
+          </button>
+          
+          <div style={{ marginBottom: '20px' }}>
+            {selectedBusForModal.serviceImage ? (
+              <img src={selectedBusForModal.serviceImage} alt={selectedBusForModal.name} style={{ height: '50px', objectFit: 'contain' }} />
+            ) : (
+              <h2 style={{ color: 'white', fontSize: '32px' }}>{selectedBusForModal.name}</h2>
+            )}
+          </div>
+
+          <div style={{ position: 'relative', width: '80%', maxWidth: '900px', height: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setModalImageIndex(prev => (prev === 0 ? 3 : prev - 1));
+              }}
+              style={{ position: 'absolute', left: '-50px', color: 'white', background: 'transparent', border: 'none', fontSize: '50px', cursor: 'pointer' }}
+            >
+              &#10094;
+            </button>
+            
+            <img 
+              src={[
+                selectedBusForModal.images?.front || '/images/buses/placeholder-front.png',
+                selectedBusForModal.images?.right || '/images/buses/placeholder-right.png',
+                selectedBusForModal.images?.left || '/images/buses/placeholder-left.png',
+                selectedBusForModal.images?.back || '/images/buses/placeholder-back.png'
+              ][modalImageIndex]} 
+              alt="Bus View"
+              style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '8px' }}
+            />
+
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setModalImageIndex(prev => (prev === 3 ? 0 : prev + 1));
+              }}
+              style={{ position: 'absolute', right: '-50px', color: 'white', background: 'transparent', border: 'none', fontSize: '50px', cursor: 'pointer' }}
+            >
+              &#10095;
+            </button>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+            {[0, 1, 2, 3].map(idx => (
+              <div 
+                key={idx}
+                onClick={() => setModalImageIndex(idx)}
+                style={{
+                  width: '12px', height: '12px', borderRadius: '50%',
+                  backgroundColor: modalImageIndex === idx ? 'white' : 'rgba(255,255,255,0.4)',
+                  cursor: 'pointer'
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
     </div>
   );

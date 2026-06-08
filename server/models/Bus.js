@@ -11,7 +11,15 @@ const busSchema = new mongoose.Schema({
     seatNumber: { type: String, required: true },
     type: { type: String, enum: ['sleeper', 'seater'], default: 'sleeper' },
     status: { type: String, enum: ['available', 'maintenance'], default: 'available' }
-  }]
+  }],
+  serviceImage: { type: String, default: '' },
+  themeColor: { type: String, default: '#0B3D91' },
+  images: {
+    front: { type: String, default: '' },
+    right: { type: String, default: '' },
+    left: { type: String, default: '' },
+    back: { type: String, default: '' }
+  }
 }, { timestamps: true });
 
 const Bus = mongoose.model('Bus', busSchema);
